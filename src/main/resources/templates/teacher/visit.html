@@ -1,0 +1,200 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="UTF-8"/>
+        <link th:href="@{/bootstrap/css/bootstrap.min.css}"
+              rel="stylesheet" media="screen"/>
+        <script th:src="@{/jquery/jquery.min.js}"></script>
+        <script th:src="@{/popper/popper.min.js}"></script>
+        <script th:src="@{/bootstrap/js/bootstrap.min.js}"></script>
+        <link th:href="@{/font-awesome/css/font-awesome.min.css}"/>
+        <script th:src="@{/moment/moment.js}"></script>
+        <style>
+            .days-table, .dates-table, .months-table {
+                border-collapse: separate;
+                text-align: center;
+            }
+
+            .selected {
+
+                background-color: #3FBF3F;
+                color: white;
+
+            }
+            .disabled {
+
+                background-color: #f5f5f5;
+                color: #696969;
+                width: 39px;
+                line-height: 39px;
+                font-size: 20px;
+
+
+            }
+            .header{
+                background-color: #00bfff;
+                color: white;
+            }
+            .holiday{
+                color: #ff4500;
+            }
+            td{
+                width: 40px;
+                height: 40px;
+                text-align: center;
+            }
+
+            .day {
+                width: 35px;
+                line-height: 35px;
+                border-radius: 50%;
+                text-align: center;
+                font-size: 20px;
+                /* border: 2px solid #666; */
+            }
+
+
+        </style>
+    </head>
+
+    <body>
+
+        <th:block th:include="/teacher/menu"></th:block>  
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-auto">
+                    <h4><strong><span th:text="#{Visit}"></span></strong></h4>
+                </div>
+            </div>
+            <div class="row justify-content-center">
+                <div class="com-md-auto">
+                    <span th:text="${calendar.faculty}"></span>
+                    &nbsp; 
+                    <span th:text="${calendar.team}"></span>
+                </div>
+            </div> 
+            <div class="row justify-content-center">
+                <div class="com-md-auto">
+                    <span th:text="${calendar.fullName}"></span>
+
+                    <span th:text="${calendar.email}"></span>
+                    &nbsp; 
+                    <span th:text="${calendar.phone}"></span>
+
+                </div>
+            </div>
+            <div class="row justify-content-center">
+                <div class="col-md-auto">  
+                    <table class="days-table">
+                        <thead>
+                            <tr >
+                                <th colspan="7">
+                                    <div class="btn-group" >
+                                        <a th:href="@{/teacher/visit/{id}/{y}/{m}/minus(id=${calendar.studentId},m=${calendar.month},y=${calendar.year})}" class="btn btn-light"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-left" viewBox="0 0 16 16">
+                                                <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"></path>
+                                            </svg></a>
+                                        <a class="btn btn-light" ><span th:text="${calendar.info}"></span></a>
+                                        <a th:href="@{/teacher/visit/{id}/{y}/{m}/add(id=${calendar.studentId},m=${calendar.month},y=${calendar.year})}" class="btn btn-light"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-right" viewBox="0 0 16 16">
+                                                <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"></path>
+                                            </svg></a>
+                                    </div>
+                                </th>
+                            </tr>
+                            <tr class="header">
+                                <th>ПН</th>
+                                <th>ВТ</th>
+                                <th>СР</th>
+                                <th>ЧТ</th>
+                                <th>ПТ</th>
+                                <th>СБ</th>
+                                <th>НД</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="week : ${calendar.weeks}" >
+                                <td th:each="day:${week.days}">
+                                    <div  th:remove="tag"  th:if="${#strings.indexOf(day.css,'disable')<0 }">
+                                        <div  th:id="${'id'+day.day}" th:class="${day.css}"  th:data-day="${day.day}" th:data-date="${day.date}"  data-toggle="modal" data-target="#addModalCenter">
+                                            <span  th:text="${day.day}"/>
+                                        </div>
+                                    </div>
+                                    <div  th:remove="tag"  th:if="${#strings.indexOf(day.css,'disable')>=0 }">
+                                        <div  th:id="${'id'+day.day}" th:class="${day.css}" th:data-day="${day.day}" th:data-date="${day.date}"  >
+                                            <span  th:text="${day.day}"/>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <!-- Modal -->
+        <div class="modal fade" id="addModalCenter" tabindex="-1" role="dialog" aria-labelledby="cancelModalCenterTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <form id="formAdd" modelAttribute="taskForm" method="POST">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="cancelModalLongTitle" th:text="#{Day.Change}"></h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <input id="studentId" type="hidden" path="studentId" name="studentId" th:value="${calendar.studentId}"></input>
+                            <input id="month" type="hidden" path="month"  name="month" th:value="${calendar.month}"></input>
+                            <input id="year" type="hidden" path="year" name="year" th:value="${calendar.year}"></input>
+                            <input id="day" readonly="readonly" type="text" name="day" path="day"></input>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal" th:text="#{Cancel}"></button>
+                            <button type="submit" class="btn btn-danger" th:text="#{Change}"></button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div><!-- Modal -->
+        <script type="text/javascript">
+            var id="";
+            $(document).ready(function () {
+                var dayVal = $(this).data("day");
+                $(".day").on("click", function (event) {
+                    id="";
+                    if ($(this).hasClass('disabled'))
+                        return false;
+                    let dt = $(this).data("date");
+                    let day = moment(dt, 'YYYY-MM-DD');
+                    $("#day").val(moment(day).format('DD.MM.YYYY'));
+                    id=$(this);
+                    event.preventDefault();
+                });
+            });
+            $("#formAdd").submit(function (event) {
+                $("#addModalCenter").modal('hide');
+                var formData = {
+                    studentId: $("#studentId").val(),
+                    date: $("#day").val(),
+                };
+
+                $.ajax({
+                    type: "POST",
+                    url: "/teacher/visit/add",
+                    data: formData,
+                }).done(function (data) {
+                    console.log(data);
+                    if (data=='ADD') id.addClass('selected');
+                    if (data=='REMOVE') id.removeClass('selected');
+                    
+                    
+                })
+                .fail(function (jqXHR, textStatus, errorThrown) {
+                    
+                });
+                event.preventDefault();
+            });
+        </script>
+
+    </body>
+
+</html>

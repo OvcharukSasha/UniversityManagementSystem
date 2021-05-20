@@ -1,0 +1,158 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="UTF-8"/>
+        <link th:href="@{/bootstrap/css/bootstrap.min.css}"
+              rel="stylesheet" media="screen"/>
+        <script th:src="@{/jquery/jquery.min.js}"></script>
+        <script th:src="@{/popper/popper.min.js}"></script>
+        <script th:src="@{/moment/moment.js}"></script>
+        <script th:src="@{/bootstrap/js/bootstrap.min.js}"></script>
+        <link th:href="@{/font-awesome/css/all.css}"
+              rel="stylesheet" />
+        <style>
+            .error {
+                color: red;
+                font-style: italic;
+            }
+            .btInfo{}
+            .btDel{}
+            .mark{ text-align: center;}
+        </style>
+    </head>
+    <body>
+
+        <script type="text/javascript">
+
+
+            $(document).ready(function (event) {
+
+                $(".mark").on("click", function () {
+                    var studentId = $(this).data("student");
+                    var taskId = $(this).data("task");
+                    var info = $(this).data("taskinfo");
+                    var name = $(this).data("name");
+                    var maxMark = $(this).data("maxmark");
+                    console.log(studentId + " " + taskId);
+                    $("#studentId").val(studentId);
+                    $("#taskId").val(taskId);
+                    $("#taskInfo").val(info);
+                    $("#studentName").val(name);
+                    $("#mark").val("");
+                    console.log(maxMark);
+                    $("#mark").attr('max', maxMark);
+                    console.log($("#mark"));
+
+
+                });
+                var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+                var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                    return new bootstrap.Tooltip(tooltipTriggerEl)
+                })
+
+            });
+
+
+        </script>
+        <th:block th:include="/teacher/menu"></th:block>
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-auto">
+                    <h4>Група <strong><span th:text="${view.team}"></span></strong></h4>
+                    <h4>Курс <strong><span th:text="${view.course}"></span></strong></h4>
+                </div>
+            </div>
+            <div class="row justify-content-center">
+                <div class="col-md-auto">
+                    <table  class="table table-bordered table-light">
+                        <thead class="thead-light">
+                            <tr>
+                                <th>
+                                    <span th:text=#{Student}></span>
+                                </th>
+                                <div th:remove="tag" th:each="task:${view.tasks}">
+                                    <th>
+                                        <span th:text="${task.info}"></span>
+                                    </th>
+                                </div>
+                                <th><span th:text=#{All}></span></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <div th:remove="tag" th:each="student:${view.students}">
+                                <tr>
+                                    <td>
+                                        <strong>
+                                            <a th:href="@{/teacher/visit/{id}(id=${student.id})}" target="_blank">
+                                            <span th:text="${student.fullName()}"></span></a>
+                                        </strong>
+                                    </td>
+                                    <div th:remove="tag"  th:each="task:${student.tasks}">
+                                        <td class="mark" 
+                                            data-toggle="modal" data-target="#addModalCenter"
+                                            th:data-maxMark="${task.maxMark}"
+                                            th:data-student="${student.id}" th:data-task="${task.id}"
+                                            th:data-taskinfo="${task.info}" th:data-name="${student.fullName()}">
+                                            <div th:if="${task.mark!=null}" th:remove="tag">
+                                                <span   th:text="${task.mark.mark}" data-bs-toggle="tooltip" data-bs-placement="top" 
+                                                        th:title="${#temporals.format(task.mark.date, 'dd.MM.yyyy')}"/>
+                                            </div>
+                                        </td>
+                                    </div>
+                                    <td>
+                                        <span th:id="${'total'+student.id}" th:text="${student.totalMark()}"></span>
+                                    </td>
+                                </tr>
+                            </div>
+                        </tbody>
+                    </table>
+                    <a th:href="@{/teacher/team/{idTeam}/{idTask}(idTeam=${view.teamId},idTask=${view.courseId})}">
+                        <span th:text="#{Back}"></span></a>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="addModalCenter" 
+             th:fragment="modal-add"
+             tabindex="-1" role="dialog" aria-labelledby="addModalCenterTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <form id="modalTask" th:action="@{/teacher/mark/add}"  
+                      method="POST" modelAttribute="markForm">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="addModalLongTitle" th:text="Задача"></h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body" >
+                            <input id="teamId" type="hidden" path="teamId" name="teamId" th:value="${view.teamId}" ></input>
+                            <input id="taskId" type="hidden" path="taskId" name="taskId" ></input>
+                            <input id="courseId" type="hidden" path="courseId" name="courseId" th:value="${view.courseId}" ></input>
+                            <input id="studentId" type="hidden" path="studentId" name="studentId" 
+                                   ></input>
+                            <div class="input-group mb-3">
+                                <span class="input-group-text" id="labelInfo1" th:text="#{Student}"></span>
+                                <input type="text" class="form-control" aria-describedby="labelInfo1" id="studentName"  path="studentName" name="studentName" readonly />
+                            </div>
+                            <div class="input-group mb-3">
+                                <span class="input-group-text" id="labelInfo2" th:text="#{Task}"></span>
+                                <input type="text" class="form-control" aria-describedby="labelInfo2" id="taskInfo"  path="taskInfo" name="taskInfo" readonly />
+                            </div>
+                            <div class="input-group mb-3">
+                                <span class="input-group-text" th:text="#{Rating}"></span>
+                                <input type="number" size="10" 
+                                       name="mark" id="mark" path="mark"  step="1" min="1"  class="form-control" required >
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button id="btnDelete" type="submit" name="del"  value="del" class="btn btn-danger" th:text="#{Delete}"></button>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal" th:text="#{Cancel}"></button>
+                            <button type="submit"  class="btn btn-success" name="add" value="add" th:text="#{Save}"></button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </body>
+</html>

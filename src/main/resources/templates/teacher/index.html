@@ -1,0 +1,99 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="UTF-8"/>
+        <link th:href="@{/bootstrap/css/bootstrap.min.css}"
+              rel="stylesheet" media="screen"/>
+        <script th:src="@{/jquery/jquery.min.js}"></script>
+        <script th:src="@{/popper/popper.min.js}"></script>
+        <script th:src="@{/bootstrap/js/bootstrap.min.js}"></script>
+        <style>
+            .error {
+                color: red;
+                font-style: italic;
+            }
+        </style>
+    </head>
+
+    <body>
+        <th:block th:include="/teacher/menu"></th:block>  
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-auto">
+                    <h4><strong><span th:text="${teacher.position+' '+teacher.surname+' '+teacher.name}"></span></strong></h4>
+                </div>
+            </div>
+            <div class="row justify-content-center">
+                <div class="col-md-auto">
+                    <table class="table table-bordered table-light">
+                        <thead class="thead-light">
+                            <tr>
+                                <th>
+                                    <span th:text="#{Course}"></span>
+                                </th>
+                                <th>
+                                    <span th:text="#{Faculty}"></span>
+                                </th>
+                                <th>
+                                    <span th:text="#{Team}"></span>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <div th:remove="tag" th:each="course:${teacher.courses}">
+                                <tr>
+                                    <td th:rowspan="${course.sizeFaculty()==0 ? 1 : course.sizeFaculty()}">
+                                        <strong>
+                                            <span th:text="${course.name}"></span>
+                                        </strong>
+                                        </br>
+                                        <span th:text="${course.info}"></span>
+                                    </td>
+                                    <td th:rowspan="${course.sizeFaculty()==0 ? 1 : course.sizeFaculty()}">
+                                        <span th:if="${course.sizeFaculty()>0}"
+                                              th:text="${course.getFirst().name}"></span>
+
+                                    </td>
+                                    <td>
+                                        <div th:if="${course.sizeFaculty()>0 && course.getFirst().sizeTeam()>0}">
+                                            <a th:href="@{/teacher/team/{idTeam}/{idTask}(idTeam=${course.getFirst().getFirst().id},
+                                               idTask=${course.id})}">
+                                                <span 
+                                                    th:text="${course.getFirst().getFirst().name}"></span></a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <div  th:remove="tag"  th:each="faculty,iStat : ${course.faculteis}">
+                                    <tr th:if="${iStat.index > 0}">
+                                        <td  th:rowspan="${faculty.sizeTeam()==0 ? 1:faculty.sizeTeam()}">
+                                            <span  th:text="${faculty.name}"></span>
+                                        </td> 
+                                        <td>
+                                            <span th:if="${faculty.sizeTeam()>0}"
+                                                  th:text="${faculty.getFirst().name}"></span>
+                                        </td>
+                                    </tr>
+                                    <div th:remove="tag"   th:each="team,iStat: ${faculty.teams}"
+                                         th:if="${iStat.index > 0}">
+                                        <tr>
+                                            <td>
+                                                <!--
+                                                <span th:text="${team.name}"></span> -->
+                                                <a th:href="@{/teacher/team/{idTeam}/{idTask}(idTeam=${team.id},
+                                                   idTask=${course.id})}">
+                                                    <span 
+                                                        th:text="${team.name}"></span></a>
+
+                                            </td>
+                                        </tr>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </body>
+</html> 

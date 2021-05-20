@@ -1,0 +1,213 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="UTF-8"/>
+        <link th:href="@{/bootstrap/css/bootstrap.min.css}"
+              rel="stylesheet" media="screen"/>
+        <script th:src="@{/jquery/jquery.min.js}"></script>
+        <script th:src="@{/popper/popper.min.js}"></script>
+        <script th:src="@{/moment/moment.js}"></script>
+        <script th:src="@{/bootstrap/js/bootstrap.min.js}"></script>
+        <link th:href="@{/font-awesome/css/all.css}"
+              rel="stylesheet" />
+        <style>
+            .error {
+                color: red;
+                font-style: italic;
+            }
+            .btInfo{}
+            .btDel{}
+        </style>
+    </head>
+    <body>
+        <script type="text/javascript">
+
+            function validate() {
+                var startDateStr = $('#startDate').val();
+                var startDate = moment(startDateStr, 'YYYY-MM-DD');
+                var deadlineStr = $('#deadline').val();
+                var deadline = moment(deadlineStr, 'YYYY-MM-DD');
+                var isafter = moment(startDate).isAfter(deadlineStr);
+                $(".error").remove();
+                if (isafter) {
+                    $('#startDate').after('<span class="error">Перевірте дату початку!</span>');
+                    return false;
+                }
+
+                return true;
+            }
+
+
+            $(document).ready(function () {
+                $(".btInfo").on("click", function () {
+                    var id = $(this).data("id");
+                    $.ajax({
+                        url: "/teacher/task/" + id,
+                        dataType: "json",
+                        success: function (data) {
+                          $("#id").val(data.id);
+                          $("#startDate").val(data.startDate);
+                          $("#deadline").val(data.deadline);
+                          $("#info").val(data.info);
+                          $("#maxMark").val(data.maxMark);
+                          console.log(data);
+                        }
+                    });
+                });
+                $(".btDel").on("click", function () {
+                    var id = $(this).data("id");
+                    var info = $(this).data("name");
+                     $("#taskId").val(id);
+                     $("#taskInfo").val(info);
+                   
+            });
+        });
+
+
+        </script>
+        <th:block th:include="/teacher/menu"></th:block>
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-auto">
+                    <h4><span th:text="#{Course}"></span> <strong><span th:text="${team.course.name}"></span></strong></h4>
+                    <h4><span th:text="#{Team}"></span> <strong><span th:text="${team.name}"></span></strong></h4>
+                </div>
+            </div>
+            <div class="row justify-content-center">
+                <div class="col-md-auto">
+                    <span th:if="${msg==null}" th:text="${msg}"></span>
+                    <table  class="table table-bordered table-light">
+                        <thead class="thead-light">
+                            <tr>
+                                <th th:text="#{Name}">
+                                    
+                                </th>
+                                <th th:text="#{Start}">
+                                    
+                                </th>
+                                <th th:text="#{Deadline}">
+                                    
+                                </th>
+                                <th th:text="#{MaxRate}">
+                                </th>
+                                <th th:text="#{Action}">
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <div th:remove="tag" th:each="task:${team.tasks}">
+                                <tr>
+                                    <td>
+                                        <strong>
+                                            <span th:text="${task.info}"></span>
+                                        </strong>
+                                    </td>
+                                    <td>
+                                        <span th:text="${#temporals.format(task.startDate, 'dd.MM.yyyy')}"></span>
+                                    </td>
+                                    <td>
+                                        <span th:text="${#temporals.format(task.deadline, 'dd.MM.yyyy')}"></span>
+                                    </td>
+                                    <td>
+                                        <span   th:text="${task.maxMark}"/>
+                                    </td>
+                                    <td>
+                                        <button  class="btn btn-labeled btn-info btInfo"
+                                                 data-toggle="modal" data-target="#addModalCenter"
+                                                 th:data-id="${task.id}" th:data-info="${task.info}">
+                                            <span class="btn-label"><i class="fas fa-edit"></i></span></button>
+                                        <button th:if="${task.delete}" class="btn btn-labeled btn-danger btDel"
+                                                 data-toggle="modal" data-target="#cancelModalCenter"
+                                                 th:data-id="${task.id}" th:data-name="${task.info}">
+                                            <span class="btn-label"><i class="far fa-trash-alt"></i></span></button>
+                                    </td>
+                                </tr>
+                            </div>
+                        </tbody>
+                    </table>
+                    <button  type="button" class="btn btn-danger"
+                             data-toggle="modal" data-target="#addModalCenter"  th:text="#{Add.Task}">
+                    </button>
+                    <a   class="btn btn-info"
+                               th:text="#{Students}"
+                               th:href="@{/teacher/students/{idTeam}/{idTask}(idTeam=${team.id},
+                      idTask=${team.course.id})}" >
+                    </a>
+                </div>
+            </div>
+        </div>
+        <!-- Modal -->
+        <div class="modal fade" id="addModalCenter" 
+             th:fragment="modal-add"
+             tabindex="-1" role="dialog" aria-labelledby="addModalCenterTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <form id="modalTask" th:action="@{/teacher/team/{idTeam}/{idTask}(idTeam=${team.id},
+                      idTask=${team.course.id})}"  
+                      method="POST" modelAttribute="taskForm"
+                      onsubmit="return validate();">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="addModalLongTitle" th:text="#{Task}"></h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body" style="width: 600px">
+                            <input id="id" type="hidden" path="id" name="id" ></input>
+                            <div class="input-group mb-3">
+                                <span class="input-group-text" id="labelInfo" th:text="#{Name}"></span>
+                                <input type="text" class="form-control" aria-describedby="labelInfo" id="info"  path="info" name="info" required />
+                            </div>
+                            <div class="input-group mb-3">
+                                <span class="input-group-text" th:text="#{Start}"></span>
+                                <input type="date" class="form-control"  id="startDate" name="startDate"
+
+                                       path="startDate" required  />
+                            </div>
+                            <div class="input-group mb-3">
+                                <span class="input-group-text" th:text="#{Deadline}"></span>
+                                <input type="date" class="form-control"  id="deadline" name="deadline"
+                                       path="deadline" required  
+                                       />
+                            </div>
+                            <div class="input-group mb-3">
+                                <span class="input-group-text" th:text="#{MaxRateFull}"></span>
+                                <input type="number" size="10" 
+                                       name="maxMark" id="maxMark" path="maxMark"  step="1" min="1" max="100"  class="form-control" required >
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal" th:text="#{Cancel}"></button>
+                            <button type="submit"  class="btn btn-danger" th:text="#{Save}"></button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div><!-- Modal -->
+        <!-- Modal -->
+        <div class="modal fade" id="cancelModalCenter" tabindex="-1" role="dialog" aria-labelledby="cancelModalCenterTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <form th:action="@{/teacher/task/del}"   modelAttribute="taskForm" method="POST">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="cancelModalLongTitle" th:text="#{DeleteTask}"></h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <input id="teamId" type="hidden" path="teamId" name="teamId" th:value="${team.id}"></input>
+                            <input id="idCourse" type="hidden" path="idCourse"  name="idCourse" th:value="${team.course.id}"></input>
+                            <input id="taskId" type="hidden" path="taskId" name="taskId"></input>
+                            <input id="taskInfo" readonly="readonly" type="text" name="taskInfo" path="taskInfo"></input>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal" th:text="#{Cancel}"></button>
+                            <button type="submit" class="btn btn-danger" th:text="#{Delete}"></button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div><!-- Modal -->
+    </body>
+</html>
