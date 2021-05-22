@@ -23,7 +23,7 @@ public class UnivirApplication implements CommandLineRunner{
 
     @Override
     public void run(String... args) throws Exception {
-      //  studentLoginRepositoty.findAll().forEach(u->service.updatePassword(u.getLogin(),"12345"));
+        studentLoginRepositoty.findAll().forEach(u->service.updatePassword(u.getLogin(),"12345"));
         
     }
 

@@ -18,10 +18,20 @@
     <body>
            <th:block th:include="/student/menu"></th:block>  
         <div class="container">
+            <br/>
+            <br/>
+            <div class="row justify-content-center">
+                <img class="img-responsive" src="https://uc.knu.ua/static/uc/images/logo.png" alt="Лого"/>
+            </div>
+            <br/>
+            <br/>
             <div class="row justify-content-center">
                 <div class="col-md-auto">
-                    
                     <h4><strong><span th:text="${teacher.position+' '+teacher.surname+' '+teacher.name}"></span></strong></h4>
+                </div>
+            </div>
+            <div class="row justify-content-center">
+                <div class="col-md-auto">
                     <a th:href= "'mailto:'+${teacher.email}"><span th:text="${teacher.email}"></span></a>
                 </div>
             </div>

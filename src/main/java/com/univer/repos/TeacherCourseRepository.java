@@ -18,6 +18,5 @@ import org.springframework.data.jpa.repository.Query;
 public interface TeacherCourseRepository extends JpaRepository<TeacherCourse, Integer>{
     @Query("select t from TeacherCourse t where t.teacher = :teacher")
     Set<TeacherCourse> findByTeacher(Teacher teacher);
-    
-    
+
 }
